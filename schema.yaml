@@ -1,6 +1,6 @@
 ---
-name: astrodb_template
-"@id": "#astrodb_template"
+name: galaxies_db
+"@id": "#galaxies_db"
 description: "Template database for use by the AstroDB Toolkit"
 
 ######################################################
@@ -289,6 +289,35 @@ tables:
         - "#RegimeList.regime"
 
 
+  - name: FakeList
+    "@id": "#FakeList"
+    description: Fake lookup table
+    primaryKey: 
+    - "#FakeList.fake"
+
+    columns:
+    - name: fake
+      "@id": "#FakeList.fake"
+      datatype: string
+      length: 30
+      description: Fake identifier string
+      ivoa:ucd: meta.id;meta.main
+      nullable: false
+    - name: description
+      "@id": "#FakeList.description"
+      datatype: string
+      length: 100
+      description: Description of the fake
+      ivoa:ucd: meta.note
+
+    indexes:
+      - name: PK_FakeList
+        "@id": "#PK_FakeList"
+        description: Primary key for FakeList table
+        columns: 
+        - "#FakeList.fake"
+
+
   - name: AssociationList
     "@id": "#AssociationList"
     description: Associations lookup table
@@ -422,59 +451,59 @@ tables:
 ######################################################
 
 
-  - name: Sources
-    "@id": "#Sources"
-    description:  "The Sources table contains all objects in the database alongside their coordinates. 
+  - name: Galaxies
+    "@id": "#Galaxies"
+    description:  "The Galaxies table contains all objects in the database alongside their coordinates. 
       This is considered the 'primary' table in the database, as each source 
       is expected to be unique and is referred to by all other object tables."
     primaryKey:
-    - "#Sources.source"
+    - "#Galaxies.galaxy"
 
     columns:
-    - name: source
-      "@id": "#Sources.source"
+    - name: galaxy
+      "@id": "#Galaxies.galaxy"
       datatype: string
       length: 50
       description: Unique identifier for the source
       ivoa:ucd: meta.id;src;meta.main
       nullable: false
     - name: ra_deg
-      "@id": "#Sources.ra_deg"
+      "@id": "#Galaxies.ra_deg"
       datatype: double
       description: Right Ascension the source, ICRS recommended
       fits:tunit: deg
       ivoa:ucd: pos.eq.ra;meta.main
     - name: dec_deg
-      "@id": "#Sources.dec_deg"
+      "@id": "#Galaxies.dec_deg"
       datatype: double
       description: Declination of the source, ICRS recommended
       fits:tunit: deg
       ivoa:ucd: pos.eq.dec;meta.main
     - name: epoch_year
-      "@id": "#Sources.epoch_year"
+      "@id": "#Galaxies.epoch_year"
       datatype: double
       description: Decimal year for coordinates (e.g., 2015.5)
       fits:tunit: yr
     - name: equinox
-      "@id": "#Sources.equinox"
+      "@id": "#Galaxies.equinox"
       datatype: string
       length: 10
       description: Equinox reference frame year (e.g., J2000). Not needed if using IRCS coordinates.
     - name: reference
-      "@id": "#Sources.reference"
+      "@id": "#Galaxies.reference"
       datatype: string
       length: 30
       description: Discovery reference for the source; links to Publications table
       ivoa:ucd: meta.ref;meta.main
       nullable: false
     - name: other_references
-      "@id": "#Sources.other_references"
+      "@id": "#Galaxies.other_references"
       datatype: string
       length: 50
       description: Additional references, comma-separated
       ivoa:ucd: meta.ref
     - name: comments
-      "@id": "#Sources.comments"
+      "@id": "#Galaxies.comments"
       datatype: string
       length: 100
       description: Free form comments
@@ -482,49 +511,49 @@ tables:
 
 
     indexes:
-      - name: PK_Sources_source
-        "@id": "#PK_Sources_source"
-        description: Primary key for Sources table
+      - name: PK_Galaxies_galaxy
+        "@id": "#PK_Galaxies_galaxy"
+        description: Primary key for Galaxies table
         columns: 
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
     constraints:
       - name: check_ra
         "@type": Check
-        "@id": "#Sources_check_ra_bounds"
+        "@id": "#Galaxies_check_ra_bounds"
         description: Validate RA range
         expression: ra_deg >= 0 AND ra_deg <= 360
       - name: check_dec
         "@type": Check
-        "@id": "#Sources_check_dec_bounds"
+        "@id": "#Galaxies_check_dec_bounds"
         description: Validate Dec range
         expression: dec_deg >= -90 AND dec_deg <= 90
       - name: Source_reference_Publications_reference
         "@type": "ForeignKey"
-        "@id": "#FK_Sources_reference_Publications_reference"
+        "@id": "#FK_Galaxies_reference_Publications_reference"
         description: Link Source reference to Publications table
         columns:
-        - "#Sources.reference"
+        - "#Galaxies.reference"
         referencedColumns:
         - "#Publications.reference"
 
 
   - name: Names
     "@id": "#Names"
-    description: "The Names table contains possible designations for sources in the Sources table. 
+    description: "The Names table contains possible designations for sources in the Galaxies table. 
       Every source must have an entry in the Names table.
       This table is not meant to be a comprehensive list of all designations for a source, but rather 
       for storing unofficial names and for quick name matching independent of external services. 
       The combination of *source* and *other_name* is expected to be unique." 
     primaryKey:
-    - "#Names.source"
+    - "#Names.galaxy"
     - "#Names.other_name"
 
     columns:
-    - name: source
-      "@id": "#Names.source"
+    - name: galaxy
+      "@id": "#Names.galaxy"
       datatype: string
       length: 100
-      description: Main identifier for an object; links to Sources table
+      description: Main identifier for an object; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: other_name
@@ -540,33 +569,33 @@ tables:
         "@id": "#PK_Names_source"
         description: Primary key for Names table
         columns: 
-        - "#Names.source"
+        - "#Names.galaxy"
         - "#Names.other_name"
     constraints:
       - name: Names_source_Source_source
         "@type": "ForeignKey"
         "@id": "#FK_Names_source_Source_source"
-        description: Link Names primary identifer to Sources table
+        description: Link Names primary identifer to Galaxies table
         columns:
-        - "#Names.source"
+        - "#Names.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
 
 
   - name: Positions
     "@id": "#Positions"
-    description: "The Positions table contains the positions of sources in the Sources table.
+    description: "The Positions table contains the positions of sources in the Galaxies table.
       The combination of *source* and *reference* is expected to be unique."
     primaryKey: 
-    - "#Positions.source"
+    - "#Positions.galaxy"
     - "#Positions.reference"
 
     columns:
-    - name: source
-      "@id": "#Positions.source"
+    - name: galaxy
+      "@id": "#Positions.galaxy"
       datatype: string
       length: 100
-      description: Unique identifier for a source; links to Sources table
+      description: Unique identifier for a source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: ra_deg
@@ -600,7 +629,7 @@ tables:
         "@id": "#PK_Positions_source"
         description: Primary key for Positions table
         columns: 
-        - "#Positions.source"
+        - "#Positions.galaxy"
         - "#Positions.reference"
     constraints:
       - name: positions_check_ra
@@ -634,19 +663,19 @@ tables:
 
   - name: Photometry
     "@id": "#Photometry"
-    description: "The Photometry table contains photometric measurements for sources listed in the Sources table. 
+    description: "The Photometry table contains photometric measurements for sources listed in the Galaxies table. 
       The combination of *source*, *band*, and *reference* is expected to be unique. "
     primaryKey: 
-    - "#Photometry.source"
+    - "#Photometry.galaxy"
     - "#Photometry.band"
     - "#Photometry.reference"
 
     columns:
-    - name: source
-      "@id": "#Photometry.source"
+    - name: galaxy
+      "@id": "#Photometry.galaxy"
       datatype: string
       length: 100
-      description: Unique identifier for a source; links to Sources table
+      description: Unique identifier for a source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: band
@@ -714,18 +743,18 @@ tables:
         "@id": "#PK_Photometry"
         description: Primary key for Photometry table
         columns: 
-        - "#Photometry.source"
+        - "#Photometry.galaxy"
         - "#Photometry.band"
         - "#Photometry.reference"
     constraints:
-      - name: Photometry_source_Sources_source
+      - name: Photometry_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_Photometry_source_Sources_source"
-        description: Link Photometry source to Sources table
+        "@id": "#FK_Photometry_galaxy_Galaxies_galaxy"
+        description: Link Photometry galaxy to Galaxies table
         columns:
-        - "#Photometry.source"
+        - "#Photometry.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: Photometry_band_PhotometryFilters_band
         "@type": "ForeignKey"
         "@id": "#FK_Photometry_band_PhotometryFilters_band"
@@ -763,18 +792,18 @@ tables:
   - name: Parallaxes
     "@id": "#Parallaxes"
     description: "The Parallaxes table contains parallax measurements for sources 
-      listed in the Sources table. 
+      listed in the Galaxies table. 
       The combination of *source* and *reference* is expected to be unique."
     primaryKey: 
-    - "#Parallaxes.source"
+    - "#Parallaxes.galaxy"
     - "#Parallaxes.reference"
 
     columns:
-    - name: source
-      "@id": "#Parallaxes.source"
+    - name: galaxy
+      "@id": "#Parallaxes.galaxy"
       datatype: string
       length: 100
-      description: Unique identifier for a source; links to Sources table
+      description: Unique identifier for a source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: parallax_mas
@@ -825,17 +854,17 @@ tables:
         "@id": "#PK_Parallaxes"
         description: Primary key for Parallaxes table
         columns: 
-        - "#Parallaxes.source"
+        - "#Parallaxes.galaxy"
         - "#Parallaxes.reference"
     constraints:
-      - name: Parallaxes_source_Sources_source
+      - name: Parallaxes_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_Parallaxes_source_Sources_source"
-        description: Link Parallaxes source to Sources table
+        "@id": "#FK_Parallaxes_galaxy_Galaxies_galaxy"
+        description: Link Parallaxes galaxy to Galaxies table
         columns:
-        - "#Parallaxes.source"
+        - "#Parallaxes.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: Parallaxes_reference_Publications_reference
         "@type": "ForeignKey"
         "@id": "#FK_Parallaxes_reference_Publications_reference"
@@ -848,18 +877,18 @@ tables:
 
   - name: RadialVelocities
     "@id": "#RadialVelocities"
-    description: "The RadialVelocities table contains radial velocity measurements for sources listed in the Sources table. 
+    description: "The RadialVelocities table contains radial velocity measurements for sources listed in the Galaxies table. 
       The combination of *source* and *reference* is expected to be unique."
     primaryKey: 
-    - "#RadialVelocities.source"
+    - "#RadialVelocities.galaxy"
     - "#RadialVelocities.reference"
 
     columns:
-    - name: source
-      "@id": "#RadialVelocities.source"
+    - name: galaxy
+      "@id": "#RadialVelocities.galaxy"
       datatype: string
       length: 50
-      description: Unique identifier for a source; links to Sources table
+      description: Unique identifier for a source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: rv_kms
@@ -910,17 +939,17 @@ tables:
         "@id": "#PK_RadialVelocities"
         description: Primary key for Radial Velocities table
         columns: 
-        - "#RadialVelocities.source"
+        - "#RadialVelocities.galaxy"
         - "#RadialVelocities.reference"
     constraints:
-      - name: RadialVelocities_source_Sources_source
+      - name: RadialVelocities_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_RadialVelocities_source_Sources_source"
-        description: Link RadialVelocities source to Sources table
+        "@id": "#FK_RadialVelocities_galaxy_Galaxies_galaxy"
+        description: Link RadialVelocities galaxy to Galaxies table
         columns:
-        - "#RadialVelocities.source"
+        - "#RadialVelocities.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: RadialVelocities_reference_Publications_reference
         "@type": "ForeignKey"
         "@id": "#FK_RadialVelocities_reference_Publications_reference"
@@ -938,18 +967,18 @@ tables:
 
   - name: CompanionRelationships
     "@id": "#CompanionRelationships"
-    description: The CompanionRelationships table contains companions to sources listed in the Sources table. 
+    description: The CompanionRelationships table contains companions to sources listed in the Galaxies table. 
       The combination of *source* and *companion_name* is expected to be unique.
     primaryKey: 
-    - "#CompanionRelationships.source"
+    - "#CompanionRelationships.galaxy"
     - "#CompanionRelationships.companion" # or companion_name
 
     columns:
-    - name: source
-      "@id": "#CompanionRelationships.source"
+    - name: galaxy
+      "@id": "#CompanionRelationships.galaxy"
       datatype: string
       length: 50
-      description: Unique identifier for the source; links to Sources table
+      description: Unique identifier for the source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: companion
@@ -1014,17 +1043,17 @@ tables:
         "@id": "#PK_CompanionRelationships"
         description: Primary key for CompanionRelationships table
         columns: 
-        - "#CompanionRelationships.source"
+        - "#CompanionRelationships.galaxy"
         - "#CompanionRelationships.companion"
     constraints:
-      - name: CompanionRelationships_source_Sources_source
+      - name: CompanionRelationships_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_CompanionRelationships_source_Sources_source"
-        description: Link CompanionRelationships source to Sources table
+        "@id": "#FK_CompanionRelationships_galaxy_Galaxies_galaxy"
+        description: Link CompanionRelationships galaxy to Galaxies table
         columns:
-        - "#CompanionRelationships.source"
+        - "#CompanionRelationships.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: CompanionRelationships_companion_CompanionList_companion
         "@type": "ForeignKey"
         "@id": "#FK_CompanionRelationships_companion_CompanionList_companion"
@@ -1047,16 +1076,16 @@ tables:
     "@id": "#CompanionParameters"
     description: Parameters for companion objects relevant to sources
     primaryKey: 
-    - "#CompanionParameters.source"
+    - "#CompanionParameters.galaxy"
     - "#CompanionParameters.companion"
     - "#CompanionParameters.parameter"
 
     columns:
-    - name: source
-      "@id": "#CompanionParameters.source"
+    - name: galaxy
+      "@id": "#CompanionParameters.galaxy"
       datatype: string
       length: 50
-      description: Main identifier for an object; links to Sources table
+      description: Main identifier for an object; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: companion
@@ -1113,19 +1142,19 @@ tables:
         "@id": "#PK_CompanionParameters"
         description: Primary key for CompanionParameters table
         columns: 
-        - "#CompanionParameters.source"
+        - "#CompanionParameters.galaxy"
         - "#CompanionParameters.companion"
         - "#CompanionParameters.parameter"
         - "#CompanionParameters.reference"
     constraints:
-      - name: CompanionParameters_source_Sources_source
+      - name: CompanionParameters_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_CompanionParameters_source_Sources_source"
-        description: Link CompanionParameters source to Sources table
+        "@id": "#FK_CompanionParameters_galaxy_Galaxies_galaxy"
+        description: Link CompanionParameters galaxy to Galaxies table
         columns:
-        - "#CompanionParameters.source"
+        - "#CompanionParameters.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: CompanionParameters_companion_CompanionList_companion
         "@type": "ForeignKey"
         "@id": "#FK_CompanionParameters_companion_CompanionList_companion"
@@ -1148,15 +1177,15 @@ tables:
     "@id": "#Associations"
     description: Association Membership for Sources
     primaryKey: 
-    - "#Associations.source"
+    - "#Associations.galaxy"
     - "#Associations.association"
 
     columns:
-    - name: source
-      "@id": "#Associations.source"
+    - name: galaxy
+      "@id": "#Associations.galaxy"
       datatype: string
       length: 50
-      description: Main identifier for an object; links to Sources table
+      description: Main identifier for an object; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: association
@@ -1194,18 +1223,18 @@ tables:
         "@id": "#PK_Associations"
         description: Primary key for Associations table
         columns: 
-        - "#Associations.source"
+        - "#Associations.galaxy"
         - "#Associations.association"
 
     constraints:
-      - name: Associations_source_Sources_source
+      - name: Associations_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_Associations_source_Sources_source"
-        description: Link Associations source to Sources table
+        "@id": "#FK_Associations_galaxy_Galaxies_galaxy"
+        description: Link Associations galaxy to Galaxies table
         columns:
-        - "#Associations.source"
+        - "#Associations.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: Associations_association_AssociationList_association
         "@type": "ForeignKey"
         "@id": "#FK_Associations_association_AssociationList_association"
@@ -1232,20 +1261,20 @@ tables:
   - name: SourceTypes
     "@id": "#SourceTypes"
     description: The SourceTypes table contains types (e.g., spectral type or galaxy type) 
-      for sources listed in the Sources table. 
+      for sources listed in the Galaxies table. 
       Source types are defined in the SourceTypeList table.
       The combination of *source*, *source_type*, and *reference* is expected to be unique.
     primaryKey: 
-    - "#SourceTypes.source"
+    - "#SourceTypes.galaxy"
     - "#SourceTypes.source_type"
     - "#SourceTypes.reference"
 
     columns:
-    - name: source
-      "@id": "#SourceTypes.source"
+    - name: galaxy
+      "@id": "#SourceTypes.galaxy"
       datatype: string
       length: 50
-      description: Main identifier for an object; links to Sources table
+      description: Main identifier for an object; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: source_type
@@ -1279,19 +1308,19 @@ tables:
         "@id": "#PK_SourceTypes"
         description: Primary key for SourceTypes table
         columns: 
-        - "#SourceTypes.source"
+        - "#SourceTypes.galaxy"
         - "#SourceTypes.source_type"
         - "#SourceTypes.reference"
 
     constraints:
-      - name: SourceTypes_source_Sources_source
+      - name: SourceTypes_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_SourceTypes_source_Sources_source"
-        description: Link SourceTypes source to Sources table
+        "@id": "#FK_SourceTypes_galaxy_Galaxies_galaxy"
+        description: Link SourceTypes galaxy to Galaxies table
         columns:
-        - "#SourceTypes.source"
+        - "#SourceTypes.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: SourceTypes_source_type_SourceTypeList_source_type
         "@type": "ForeignKey"
         "@id": "#FK_SourceTypes_source_type_SourceTypeList_source_type"
@@ -1312,18 +1341,18 @@ tables:
 
   - name: ProperMotions
     "@id": "#ProperMotions"
-    description: "The ProperMotions table contains proper motion measurements for sources listed in the Sources table. 
+    description: "The ProperMotions table contains proper motion measurements for sources listed in the Galaxies table. 
       The combination of *source* and *reference* is expected to be unique."
     primaryKey: 
-    - "#ProperMotions.source"
+    - "#ProperMotions.galaxy"
     - "#ProperMotions.reference"
 
     columns:
-    - name: source
-      "@id": "#ProperMotions.source"
+    - name: galaxy
+      "@id": "#ProperMotions.galaxy"
       datatype: string
       length: 50
-      description: Main identifier for an object; links to Sources table
+      description: Main identifier for an object; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: pm_ra
@@ -1399,18 +1428,18 @@ tables:
         "@id": "#PK_ProperMotions"
         description: Primary key for ProperMotions table
         columns: 
-        - "#ProperMotions.source"
+        - "#ProperMotions.galaxy"
         - "#ProperMotions.reference"
 
     constraints:
-      - name: ProperMotions_source_Sources_source
+      - name: ProperMotions_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_ProperMotions_source_Sources_source"
-        description: Link ProperMotions source to Sources table
+        "@id": "#FK_ProperMotions_galaxy_Galaxies_galaxy"
+        description: Link ProperMotions galaxy to Galaxies table
         columns:
-        - "#ProperMotions.source"
+        - "#ProperMotions.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: ProperMotions_reference_Publications_reference
         "@type": "ForeignKey"
         "@id": "#FK_ProperMotions_reference_Publications_reference"
@@ -1424,21 +1453,21 @@ tables:
   - name: ModeledParameters
     "@id": "#ModeledParameters"
     description: "The ModeledParameters table contains a range of derived/inferred 
-      parameters for sources listed in the Sources table. 
+      parameters for sources listed in the Galaxies table. 
       The combination of *source*, *parameter*, and *reference* is expected to be unique.
       Note that *parameter* is linked to the Parameters table. "
     primaryKey: 
-    - "#ModeledParameters.source"
+    - "#ModeledParameters.galaxy"
     - "#ModeledParameters.model"
     - "#ModeledParameters.parameter"
     - "#ModeledParameters.reference"
 
     columns:
-    - name: source
-      "@id": "#ModeledParameters.source"
+    - name: galaxy
+      "@id": "#ModeledParameters.galaxy"
       datatype: string
       length: 50
-      description: Unique identifier for the source; links to Sources table
+      description: Unique identifier for the source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: model
@@ -1501,20 +1530,20 @@ tables:
         "@id": "#PK_ModeledParameters"
         description: Primary key for ModeledParameters table
         columns: 
-        - "#ModeledParameters.source"
+        - "#ModeledParameters.galaxy"
         - "#ModeledParameters.model"
         - "#ModeledParameters.parameter"
         - "#ModeledParameters.reference"
 
     constraints:
-      - name: ModeledParameters_source_Sources_source
+      - name: ModeledParameters_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_ModeledParameters_source_Sources_source"
-        description: Link ModeledParameters source to Sources table
+        "@id": "#FK_ModeledParameters_galaxy_Galaxies_galaxy"
+        description: Link ModeledParameters galaxy to Galaxies table
         columns:
-        - "#ModeledParameters.source"
+        - "#ModeledParameters.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: ModeledParameters_reference_Publications_reference
         "@type": "ForeignKey"
         "@id": "#FK_ModeledParameters_reference_Publications_reference"
@@ -1537,15 +1566,15 @@ tables:
     "@id": "#RotationalParameters"
     description: Rotational parameters for sources
     primaryKey:
-    - "#RotationalParameters.source"
+    - "#RotationalParameters.galaxy"
     - "#RotationalParameters.reference"
 
     columns:
-    - name: source
-      "@id": "#RotationalParameters.source"
+    - name: galaxy
+      "@id": "#RotationalParameters.galaxy"
       datatype: string
       length: 50
-      description: Main identifier for an object; links to Sources table
+      description: Main identifier for an object; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: period_hr
@@ -1644,18 +1673,18 @@ tables:
         "@id": "#PK_RotationalParameters"
         description: Primary key for RotationalParameters table
         columns: 
-        - "#RotationalParameters.source"
+        - "#RotationalParameters.galaxy"
         - "#RotationalParameters.reference"
     
     constraints:
-      - name: RotationalParameters_source_Sources_source
+      - name: RotationalParameters_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_RotationalParameters_source_Sources_source"
-        description: Link RotationalParameters source to Sources table
+        "@id": "#FK_RotationalParameters_galaxy_Galaxies_galaxy"
+        description: Link RotationalParameters galaxy to Galaxies table
         columns:
-        - "#RotationalParameters.source"
+        - "#RotationalParameters.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: RotationalParameters_reference_Publications_reference
         "@type": "ForeignKey"
         "@id": "#FK_RotationalParameters_reference_Publications_reference"
@@ -1668,18 +1697,18 @@ tables:
 
   - name: Morphology
     "@id": "#Morphology"
-    description: "The Morphology table contains morphological measurements for sources listed in the Sources table. 
+    description: "The Morphology table contains morphological measurements for sources listed in the Galaxies table. 
       The combination of *source* and *reference* is expected to be unique."
     primaryKey: 
-    - "#Morphology.source"
+    - "#Morphology.galaxy"
     - "#Morphology.reference"
 
     columns:
-    - name: source
-      "@id": "#Morphology.source"
+    - name: galaxy
+      "@id": "#Morphology.galaxy"
       datatype: string
       length: 50
-      description: Unique identifier for a source; links to Sources table
+      description: Unique identifier for a source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: position_angle_deg
@@ -1774,17 +1803,17 @@ tables:
         "@id": "#PK_Morphology"
         description: Primary key for Morphology table
         columns: 
-        - "#Morphology.source"
+        - "#Morphology.galaxy"
         - "#Morphology.reference"
     constraints:
-      - name: Morphology_source_Sources_source
+      - name: Morphology_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_Morphology_source_Sources_source"
-        description: Link Morphology source to Sources table
+        "@id": "#FK_Morphology_galaxy_Galaxies_galaxy"
+        description: Link Morphology galaxy to Galaxies table
         columns:
-        - "#Morphology.source"
+        - "#Morphology.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: Morphology_reference_Publications_reference
         "@type": "ForeignKey"
         "@id": "#FK_Morphology_reference_Publications_reference"
@@ -1802,21 +1831,21 @@ tables:
 
   - name: Spectra
     "@id": "#Spectra"
-    description: "The Spectra table contains spectral data for sources listed in the Sources table. 
+    description: "The Spectra table contains spectral data for sources listed in the Galaxies table. 
       The combination of *source*, *regime*, *mode*, *observation_date*, and *reference* is expected to be unique."
     primaryKey: 
-    - "#Spectra.source"
+    - "#Spectra.galaxy"
     - "#Spectra.regime"
     - "#Spectra.mode"
     - "#Spectra.observation_date"
     - "#Spectra.reference"
 
     columns:
-    - name: source
-      "@id": "#Spectra.source"
+    - name: galaxy
+      "@id": "#Spectra.galaxy"
       datatype: string
       length: 50
-      description: Unique identifier for the source; links to Sources table
+      description: Unique identifier for the source; links to Galaxies table
       ivoa:ucd: meta.id;meta.main
       nullable: false
     - name: access_url
@@ -1896,21 +1925,21 @@ tables:
         "@id": "#PK_Spectra"
         description: Primary key for Spectra table
         columns: 
-        - "#Spectra.source"
+        - "#Spectra.galaxy"
         - "#Spectra.regime"
         - "#Spectra.mode"
         - "#Spectra.observation_date"
         - "#Spectra.reference"
 
     constraints:
-      - name: Spectra_source_Sources_source
+      - name: Spectra_galaxy_Galaxies_galaxy
         "@type": "ForeignKey"
-        "@id": "#FK_Spectra_source_Sources_source"
-        description: Link Spectra source to Sources table
+        "@id": "#FK_Spectra_galaxy_Galaxies_galaxy"
+        description: Link Spectra galaxy to Galaxies table
         columns:
-        - "#Spectra.source"
+        - "#Spectra.galaxy"
         referencedColumns:
-        - "#Sources.source"
+        - "#Galaxies.galaxy"
       - name: Spectra_regime_RegimeList_regime
         "@type": "ForeignKey"
         "@id": "#FK_Spectra_regime_RegimeList_regime"

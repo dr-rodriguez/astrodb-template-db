@@ -1,7 +1,7 @@
 {
-    "Sources": [
+    "Galaxies": [
         {
-            "source": "Crab Nebula",
+            "galaxy": "Crab Nebula",
             "ra_deg": 57.6328,
             "dec_deg": 14.28,
             "epoch_year": 2000.0,

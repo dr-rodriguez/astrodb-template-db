@@ -1,7 +1,7 @@
 {
-    "Sources": [
+    "Galaxies": [
         {
-            "source": "Gl 229b",
+            "galaxy": "Gl 229b",
             "ra_deg": 92.6442,
             "dec_deg": -21.8646,
             "epoch_year": 2000.0,

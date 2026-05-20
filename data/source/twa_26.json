@@ -1,7 +1,7 @@
 {
-    "Sources": [
+    "Galaxies": [
         {
-            "source": "TWA 26",
+            "galaxy": "TWA 26",
             "ra_deg": 174.96308,
             "dec_deg": -31.989305,
             "epoch_year": null,

@@ -1,7 +1,7 @@
 {
-    "Sources": [
+    "Galaxies": [
         {
-            "source": "Draco II",
+            "galaxy": "Draco II",
             "ra_deg": 238.198333,
             "dec_deg": 64.565278,
             "equinox": "ICRS",
@@ -20,7 +20,7 @@
     ],
     "Morphology": [
         {
-            "source": "Draco II",
+            "galaxy": "Draco II",
             "position_angle_deg": 76.0,
             "position_angle_error_upper": 22.0,
             "position_angle_error_lower": 32.0,

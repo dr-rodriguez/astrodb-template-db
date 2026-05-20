@@ -1,7 +1,7 @@
 {
-    "Sources": [
+    "Galaxies": [
         {
-            "source": "2MASS J21140802-2251358",
+            "galaxy": "2MASS J21140802-2251358",
             "ra_deg": 318.533,
             "dec_deg": -22.86,
             "epoch_year": 2000.0,
